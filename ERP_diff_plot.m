@@ -18,7 +18,7 @@ function coords = ERP_diff_plot(STUDY, ALLEEG, clus_range, group_range)
     XH = []; YH = []; % x, y coordinates of horz line segments
     XV = []; YV = []; % x, y coordinates of vert line segments
     
-    P = [] ; T = []; R = []; L = [];
+    P = [] ; T = []; R = []; L = []; % for the bar chart 
     
     for clus = clus_range %clus_range(1):clus_range(end)
         %[STUDY, erpdata, erptimes] = std_erpplot(STUDY, ALLEEG, 'noplot', 'on', 'clusters', clus); % one erpdata for each condition
