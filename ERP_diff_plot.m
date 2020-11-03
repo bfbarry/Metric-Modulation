@@ -7,11 +7,13 @@ function coords = ERP_diff_plot(STUDY, ALLEEG, clus_range, group_range)
     % extract number of clusters from STUDY
     %clus_shape = size(STUDY.cluster); num_cl = clus_shape(2);         
     
+    cluster_name = 'Cluster 1'; design_name = '2 way comparison ';
+
     if nargin < 4
         group_range = 1;
     end
     
-    bar = 1; % bar chart displaying individual vals for line segments
+    bar = false; % bar chart displaying individual vals for line segments
     
     x = []; % x coordinates (hand for now)
     y = []; % y coordinates (event type for now
@@ -22,13 +24,12 @@ function coords = ERP_diff_plot(STUDY, ALLEEG, clus_range, group_range)
     
     for clus = clus_range %clus_range(1):clus_range(end)
         %[STUDY, erpdata, erptimes] = std_erpplot(STUDY, ALLEEG, 'noplot', 'on', 'clusters', clus); % one erpdata for each condition
-        load(strcat('~/Desktop/IversenLab/external/ERPs/diponly_',int2str(clus),'_erps.mat'));
+        load(strcat('./data/ERPs/diponly/diponly_',int2str(clus),'_erps.mat'));
         diffs = []; % contains the max OR ranges of: PL, PR, TL, TR (in that order)
-        
         
         for d = 1:numel(erpdata) % specific to study design!
             erp_mean = mean(erpdata{d}, 2);  %have to avg across axis 2
-            diffs = [diffs, max(erp_mean)]; % trying either max() or range()
+            diffs = [diffs, max(erp_mean)/min(erp_mean)]; % trying either max() or range()
         end
         
         RL_P = diffs(2) - diffs(1); RL_T = diffs(4) - diffs(3); % PR - PL; TR- TL
@@ -57,7 +58,7 @@ function coords = ERP_diff_plot(STUDY, ALLEEG, clus_range, group_range)
     colors = linspace(1,8,length(x));
     scatter(x, y, 50, colors, 'filled'); %plotting here
     xlabel('Right-Left'); ylabel('Press-Tap');
-    title(sprintf('%s, %s', 'cluster 1', '2 way comparison '));
+    title(sprintf('%s, %s', cluster_name, design_name));
     hold on
     
     %Labels
@@ -69,8 +70,8 @@ function coords = ERP_diff_plot(STUDY, ALLEEG, clus_range, group_range)
         plot([XH, XV], [YH, YV], '-r');
     end
     
-    xlim([-0.12, 0.12]); %resize x-axis
-    ylim([-0.12, 0.12]); %resize y-axis
+    % xlim([-0.12, 0.12]); %resize x-axis
+    % ylim([-0.12, 0.12]); %resize y-axis
     plot([0 0], ylim, '-k'); %plot a vertical line through (0,0)
     plot(xlim, [0 0],  '-k'); %plot a horizontal line through (0,0)
     axis equal 
