@@ -2,9 +2,10 @@ import fooof
 import numpy as np
 from scipy.io import loadmat
 
-def load_and_fit(dimension, freqrange, aperiodic_mode = 'fixed', min_peak_height = 0):
+def load_and_fit(dimension, freqrange, omit = None, aperiodic_mode = 'fixed', min_peak_height = 0):
     """dimension: if 'condition', averages across components
                   if 'component', averages across conditions
+        omit a dictionary of components to omit {cluster_num:[components]...}
     """
     group_df = dict.fromkeys(['cluster {}'.format(i) for i in range(3,15)])
 
@@ -20,6 +21,12 @@ def load_and_fit(dimension, freqrange, aperiodic_mode = 'fixed', min_peak_height
         elif dimension == 'component':
             group_spec = specdata.mean(0)[0] # 16 x 229
         
+        #omitting bad spectra
+        try:
+            group_spec = np.delete(group_spec, omit[i], axis=1)
+        except:
+            pass
+
         fg = fooof.FOOOFGroup(aperiodic_mode=aperiodic_mode, min_peak_height = min_peak_height, verbose = False)
         
         if dimension == 'condition':

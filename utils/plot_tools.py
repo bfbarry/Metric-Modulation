@@ -5,14 +5,26 @@ import numpy as np
 from scipy.io import loadmat
 import cycler
 
-def plotFlatComps(fit_data, mark_peak):
+def _prox_query(q, l, return_index = True):
+    '''returns closest item in a list to query'''
+    diffs = [np.abs(i - q) for i in l]
+    if return_index:
+        return diffs.index(min(diffs))
+    else:
+        return l[diffs.index(min(diffs))]
+
+def plotFlatComps(fit_data, mark_peak, omit = None):
     """Plots all clusters and their component spectra. Point of oscillation is markered. 
     Spectra of components w/o oscillations are dotted."""
     for i, cl in enumerate(range(3,15)):
         p_spectrum = loadmat('./data/spectra/dip_only/brian_diponly_{}_spectra.mat'.format(cl))
         specfreqs, specdata = p_spectrum['specfreqs'][0], p_spectrum['specdata']
         group_spec = specdata.mean(0)[0]
-        
+        #omit bad spectra 
+        try:
+            group_spec = np.delete(group_spec, omit[cl], axis=1)
+        except:
+            pass
         peak_data = fit_data['cluster {}'.format(cl)]['peak data']['CF']
         
         peak_comps = peak_data[:,1] #components that have peaks
@@ -41,7 +53,8 @@ def plotFlatComps(fit_data, mark_peak):
                     if p[1] == c:
                         peak_freqs.append(p[0])
             #convert freqs to x axis indeces
-            markers_on = [list(np.floor(specfreqs)).index(i) for i in np.floor(np.array(peak_freqs))]
+            #markers_on = [list(np.floor(specfreqs)).index(i) for i in np.floor(np.array(peak_freqs))]
+            markers_on = [_prox_query(p,specfreqs) for p in peak_freqs]
             plt.plot(specfreqs[:84], group_spec[:,c][:84], marker = marker, linestyle = linestyle, markevery = markers_on, markersize=4)
         plt.title(flat_comps)
         plt.tight_layout()
