@@ -21,7 +21,7 @@ def load_and_fit(dimension, freqrange, omit = None, aperiodic_mode = 'fixed', mi
         elif dimension == 'component':
             group_spec = specdata.mean(0)[0] # 16 x 229
         
-        #omitting bad spectra
+        #omitting bad spectra (remove later for automatic)
         try:
             group_spec = np.delete(group_spec, omit[i], axis=1)
         except:
@@ -33,7 +33,19 @@ def load_and_fit(dimension, freqrange, omit = None, aperiodic_mode = 'fixed', mi
             fg.fit(specfreqs, group_spec, freqrange)
         elif dimension == 'component':
             fg.fit(specfreqs, group_spec.T, freqrange)
-            
+
+        omit = [] #indices of flat/bad components
+        # if less than .05, add component index to an array and refit the cluster without those spectra 
+        for n_i, r in enumerate(fg.get_params('r_squared')):
+            if r < 0.7: omit.append(n_i)
+        group_spec = np.delete(group_spec, omit, axis=1)
+
+        #refit spectra w/o those components
+        if dimension == 'condition':
+            fg.fit(specfreqs, group_spec, freqrange)
+        elif dimension == 'component':
+            fg.fit(specfreqs, group_spec.T, freqrange)
+
         group_df['cluster {}'.format(i)]['spectral exponent'] = fg.get_params('aperiodic_params', 'exponent')
         group_df['cluster {}'.format(i)]['peak data'] = { 'CF': fg.get_params('peak_params', 'CF'), 
                                                           'PW': fg.get_params('peak_params', 'PW'), 
