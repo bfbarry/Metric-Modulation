@@ -2,7 +2,7 @@ import fooof
 import numpy as np
 from scipy.io import loadmat
 
-def load_and_fit(dimension, freqrange, omit = None, aperiodic_mode = 'fixed', min_peak_height = 0):
+def load_and_fit(dimension, freqrange, omit_r2 = 0.7, aperiodic_mode = 'fixed', min_peak_height = 0):
     """dimension: if 'condition', averages across components
                   if 'component', averages across conditions
         omit a dictionary of components to omit {cluster_num:[components]...}
@@ -22,10 +22,10 @@ def load_and_fit(dimension, freqrange, omit = None, aperiodic_mode = 'fixed', mi
             group_spec = specdata.mean(0)[0] # 16 x 229
         
         #omitting bad spectra (remove later for automatic)
-        try:
-            group_spec = np.delete(group_spec, omit[i], axis=1)
-        except:
-            pass
+        # try:
+        #     group_spec = np.delete(group_spec, omit[i], axis=1)
+        # except:
+        #     pass
 
         fg = fooof.FOOOFGroup(aperiodic_mode=aperiodic_mode, min_peak_height = min_peak_height, verbose = False)
         
@@ -37,7 +37,7 @@ def load_and_fit(dimension, freqrange, omit = None, aperiodic_mode = 'fixed', mi
         omit = [] #indices of flat/bad components
         # if less than .05, add component index to an array and refit the cluster without those spectra 
         for n_i, r in enumerate(fg.get_params('r_squared')):
-            if r < 0.7: omit.append(n_i)
+            if r < omit_r2: omit.append(n_i)
         group_spec = np.delete(group_spec, omit, axis=1)
 
         #refit spectra w/o those components
