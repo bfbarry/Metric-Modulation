@@ -13,18 +13,19 @@ def _prox_query(q, l, return_index = True):
     else:
         return l[diffs.index(min(diffs))]
 
-def plotFlatComps(fit_data, mark_peak, omit = None):
+def plotFlatComps(fit_data, mark_peak, draw_omit = False):
     """Plots all clusters and their component spectra. Point of oscillation is markered. 
-    Spectra of components w/o oscillations are dotted."""
+    Spectra of components w/o oscillations are dotted.
+    TODO: If draw_omit : plots omitted spectra w/ a different line style than the two existing ones"""
     for i, cl in enumerate(range(3,15)):
-        p_spectrum = loadmat('./data/spectra/dip_only/brian_diponly_{}_spectra.mat'.format(cl))
-        specfreqs, specdata = p_spectrum['specfreqs'][0], p_spectrum['specdata']
-        group_spec = specdata.mean(0)[0]
-        #omit bad spectra 
-        try:
-            group_spec = np.delete(group_spec, omit[cl], axis=1)
-        except:
-            pass
+        specfreqs, group_spec =  fit_data[f'cluster {cl}']['data']['freqs'], fit_data[f'cluster {cl}']['data']['spectra']
+        if not draw_omit:
+            omit = fit_data[f'cluster {cl}']['omit id']
+            #omit bad spectra 
+            try:
+                group_spec = np.delete(group_spec, omit[cl], axis=1)
+            except:
+                pass
         peak_data = fit_data['cluster {}'.format(cl)]['peak data']['CF']
         
         peak_comps = peak_data[:,1] #components that have peaks
