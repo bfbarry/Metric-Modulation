@@ -56,7 +56,8 @@ def plotFlatComps(fit_data, mark_peak, draw_omit = False):
             #convert freqs to x axis indeces
             #markers_on = [list(np.floor(specfreqs)).index(i) for i in np.floor(np.array(peak_freqs))]
             markers_on = [_prox_query(p,specfreqs) for p in peak_freqs]
-            plt.plot(specfreqs[:84], group_spec[:,c][:84], marker = marker, linestyle = linestyle, markevery = markers_on, markersize=4)
+            plt.semilogy(specfreqs[:84], group_spec[:,c][:84], marker = marker, linestyle = linestyle, markevery = markers_on, markersize=4)
+            plt.ylabel('db'); 
         plt.title(flat_comps)
         plt.tight_layout()
 
@@ -125,5 +126,6 @@ def peakDistr(fit_data, plt_format = 'subplots', order = 'unsorted'):
             plt.bar(list(range(len(peaks))), sorted(powers), color = colors[i], alpha = a)
         else:
             plt.bar(peaks, powers, color = colors[i], alpha = a)
-        plt.xlabel('freq'); plt.ylabel('power')
+        plt.xlabel('freq'); plt.ylabel('log10(power) above aperiodic')
+        #plt.text(-6.5,-0.4, 'Freqs', ha='center', fontsize=12, fontweight='bold')
         plt.tight_layout()
