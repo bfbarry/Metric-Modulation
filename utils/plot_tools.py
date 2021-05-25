@@ -13,7 +13,7 @@ def _prox_query(q, l, return_index = True):
     else:
         return l[diffs.index(min(diffs))]
 
-def plotFlatComps(fit_data, mark_peak, draw_omit = False):
+def plotFlatComps(fit_data, mark_peak, draw_omit = False, dimension='component'):
     """Plots all clusters and their component spectra. Point of oscillation is markered. 
     Spectra of components w/o oscillations are dotted.
     TODO: If draw_omit : plots omitted spectra w/ a different line style than the two existing ones"""
@@ -38,27 +38,33 @@ def plotFlatComps(fit_data, mark_peak, draw_omit = False):
         
         flat_comps = 'Non osc comps: '
         plt.subplot(3,4,i+1)
-        for c in range(n_): #loop over comps
-            peak_freqs = []
-            if mark_peak:
-                marker = 'D'
-            else:
-                marker = ''
-            linestyle = '-'
-            
-            if c not in bumpy_comps:
-                linestyle = '--'; marker = ''
-                flat_comps += "{}, ".format(c)
-            else: #append peaks to peak_freqs to read later and plot marker on spectra
-                for p in peak_data:
-                    if p[1] == c:
-                        peak_freqs.append(p[0])
-            #convert freqs to x axis indeces
-            #markers_on = [list(np.floor(specfreqs)).index(i) for i in np.floor(np.array(peak_freqs))]
-            markers_on = [_prox_query(p,specfreqs) for p in peak_freqs]
-            plt.semilogy(specfreqs[:84], group_spec[:,c][:84], marker = marker, linestyle = linestyle, markevery = markers_on, markersize=4)
-            plt.ylabel('db'); 
-        plt.title(flat_comps)
+        if dimension == 'component':
+            for c in range(n_): #loop over comps
+                peak_freqs = []
+                if mark_peak:
+                    marker = 'D'
+                else:
+                    marker = ''
+                linestyle = '-'
+                
+                if c not in bumpy_comps:
+                    linestyle = '--'; marker = ''
+                    flat_comps += "{}, ".format(c)
+                else: #append peaks to peak_freqs to read later and plot marker on spectra
+                    for p in peak_data:
+                        if p[1] == c:
+                            peak_freqs.append(p[0])
+                #convert freqs to x axis indeces
+                #markers_on = [list(np.floor(specfreqs)).index(i) for i in np.floor(np.array(peak_freqs))]
+                markers_on = [_prox_query(p,specfreqs) for p in peak_freqs]
+                plt.semilogy(specfreqs[:84], group_spec[:,c][:84], marker = marker, linestyle = linestyle, markevery = markers_on, markersize=4)
+                plt.ylabel('db'); 
+            plt.title(flat_comps)
+        
+        elif dimension == 'condition':
+            colors = ['b','r','g','orange'] # PL, PR, TL, TR
+            for i in range(4):
+                plt.semilogy(specfreqs[:84], group_spec[i][:84], color = colors[i], label = str(i)) #, markevery = markers_on, markersize=4
         plt.tight_layout()
 
 def peakPlot(fit_data, param, bins = plt.rcParams["hist.bins"], plt_format = 'layered'):
