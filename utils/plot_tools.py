@@ -107,15 +107,15 @@ def peakPlot(fit_data, param, bins = plt.rcParams["hist.bins"], plt_format = 'la
             plt.xlabel('Center Frequency'); plt.ylabel('counts')
         plt.tight_layout()
 
-def peakDataScatter(fit_data, measures = ['CF', "BW"]):
+def peakDataScatter(fit_data, measures = ['CF', "BW"],color='blue'):
     """Scatter plot of peak measures, default CF vs BW"""
     m1, m2 = measures[0], measures[1]
-    colors = plt.cm.brg(np.linspace(0, 1,12))
+    #colors = plt.cm.brg(np.linspace(0, 1,12))
     for i, cl in enumerate(range(3,15)):
         peaks = fit_data['cluster {}'.format(cl)]['peak data'][m1][:,0] #because peak_data for FOOOFgroup is stored as [data, spectral curve #]
         pk_widths = fit_data['cluster {}'.format(cl)]['peak data'][m2][:,0]
         plt.subplot(3,4,i+1)
-        plt.scatter(peaks, pk_widths, color = colors[i], alpha = 0.7)
+        plt.scatter(peaks, pk_widths, color = color, alpha = 0.7)
         plt.xlabel(m1); plt.ylabel(m2)
         plt.tight_layout()
     
