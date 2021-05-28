@@ -13,7 +13,7 @@ def load_and_fit(dimension, freqrange, omit_r2 = 0.7, aperiodic_mode = 'fixed', 
         fit_data[k] = {'spectral exponent':None, 'peak data':None, 'r2':None}
 
     for i in range(3,15):
-        p_spectrum = loadmat('./data/spectra/dip_only/brian_diponly_{}_spectra.mat'.format(i))
+        p_spectrum = loadmat('../data/spectra/dip_only/brian_diponly_{}_spectra.mat'.format(i))
         specfreqs, specdata = p_spectrum['specfreqs'][0], p_spectrum['specdata']
         if dimension == 'condition':
             group_spec = np.array([specdata[i][0].mean(1) for i in range(4)])# shaped 4x229, averaged across 16 components

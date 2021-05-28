@@ -58,14 +58,32 @@ def plotFlatComps(fit_data, mark_peak, draw_omit = False, dimension='component')
                 #markers_on = [list(np.floor(specfreqs)).index(i) for i in np.floor(np.array(peak_freqs))]
                 markers_on = [_prox_query(p,specfreqs) for p in peak_freqs]
                 plt.semilogy(specfreqs[:84], group_spec[:,c][:84], marker = marker, linestyle = linestyle, markevery = markers_on, markersize=4)
-                plt.ylabel('db'); 
+                plt.ylabel('log10(db)'); 
             plt.title(flat_comps)
         
         elif dimension == 'condition':
             colors = ['b','r','g','orange'] # PL, PR, TL, TR
-            for i in range(4):
-                plt.semilogy(specfreqs[:84], group_spec[i][:84], color = colors[i], label = str(i)) #, markevery = markers_on, markersize=4
-        plt.tight_layout()
+            for j, l  in enumerate(['PL', 'PR', 'TL', 'TR']):
+                peak_freqs = []
+                if mark_peak:
+                    marker = 'D'
+                else:
+                    marker = ''
+                linestyle = '-'
+                
+                
+                for p in peak_data:
+                    if p[1] == j:
+                        peak_freqs.append(p[0])
+                #convert freqs to x axis indeces
+                markers_on = [_prox_query(p,specfreqs) for p in peak_freqs]
+                # print(markers_on)
+                plt.semilogy(specfreqs[:84], group_spec[j][:84], color = colors[j], label = l, marker=marker, markevery = markers_on, markersize=4) #
+                plt.title(f'Cluster {cl}')
+                if i + 1 == 5: 
+                    plt.ylabel('log10(db)'); 
+    plt.legend()
+    plt.tight_layout()
 
 def peakPlot(fit_data, param, bins = plt.rcParams["hist.bins"], plt_format = 'layered'):
     """param: 'CF', 'PW', or 'BW' 
