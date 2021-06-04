@@ -2,7 +2,7 @@ import fooof
 import numpy as np
 from scipy.io import loadmat
 
-def load_and_fit(dimension, freqrange, omit_r2 = 0.7, aperiodic_mode = 'fixed', min_peak_height = 0):
+def load_and_fit(dimension, freqrange, omit_r2 = 0.7, aperiodic_mode = 'fixed', min_peak_height = 0, **fooof_kwargs):
     """dimension: if 'condition', averages across components
                   if 'component', averages across conditions
         omit_r2 is r2 threshold
@@ -21,7 +21,7 @@ def load_and_fit(dimension, freqrange, omit_r2 = 0.7, aperiodic_mode = 'fixed', 
         elif dimension == 'component':
             group_spec = specdata.mean(0)[0] # 16 x 229
 
-        fg = fooof.FOOOFGroup(aperiodic_mode=aperiodic_mode, min_peak_height = min_peak_height, verbose = False)
+        fg = fooof.FOOOFGroup(aperiodic_mode=aperiodic_mode, min_peak_height = min_peak_height, verbose = False, **fooof_kwargs)
         
         if dimension == 'condition':
             fg.fit(specfreqs, group_spec, freqrange)

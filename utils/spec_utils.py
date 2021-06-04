@@ -46,19 +46,29 @@ def id_modes(fit_data):
             if len(o_peaks) == 4:
                 pass
 
-def find_differences(data, measure='CF'):
+def _get_change(current, previous):
+    if current == previous:
+        return 100.0
+    try:
+        return (abs(current - previous) / previous) * 100.0
+    except ZeroDivisionError:
+        return 0
+
+def find_change(data, measure='PW', change='-'):
     """ Characterize differences in given measure between testing conditions.
     measure: in {'CF' (oscillation peak height), 'exponent'}
-    indices of peak data are PL, PR, TL, TR """
-    if measure in {'CF', 'PW', 'BW'}:
+    indices of peak data are PL, PR, TL, TR 
+    change can be '-' for difference or '%' for percent change"""
+    if measure in {'PW', 'BW'}:
         peaks = []
         powers = []
         for i, cl in enumerate(range(3,15)):
             peaks.append(data['cluster {}'.format(cl)]['peak data']['CF']) #[:,0]) 
-            powers.append(data['cluster {}'.format(cl)]['peak data']['PW']) #[:,0]) 
+            powers.append(data['cluster {}'.format(cl)]['peak data'][measure]) #[:,0]) 
         
         diffs = dict()
         for o in OSCILLATIONS.keys():
+            if o in ('delta','gamma'): continue # since doesn't pass for now
             #print('++++++OSC', o)
             o_range = OSCILLATIONS[o]
             min_, max_ = o_range[0], o_range[1]
@@ -68,17 +78,34 @@ def find_differences(data, measure='CF'):
                 o_peaks = [] # peaks at oscillation o for cluster cl, make sure these are indexed properly
                 clus_peaks = peaks[i]
                 clus_pows = powers[i]
+                
                 #this case assumes 4 peaks distr across conditions
                 for peak, power in zip(clus_peaks,clus_pows):
                     if min_ <= peak[0] < max_: # if in peak range
                         o_peaks.append(power)
+
+                if cl in (9, 14):
+                    print(f'====oscillation: {o}\n cl: {cl}\n {o_peaks}')
                 #loop over conditions, if more than 1, avg the heights of the two 
-                ... # TODO
+                # if set(np.array(o_peaks)[:,1]) != {1,2,3,4}:
+                #     continue
+
+                pre = {0:[], 1:[], 2:[], 3:[]}
+                for op in o_peaks:
+                    pre[op[1]].append(op[0])
+
+                o_peaks = []
+                for c in (0,1,2,3):
+                    o_peaks.append(np.mean(pre[c]))
                         
                 if len(o_peaks) == 4: # What do you do if more than 4?
-                    RL_P = o_peaks[1][0] - o_peaks[0][0]; RL_T = o_peaks[3][0] - o_peaks[2][0] # PR - PL; TR- TL
-                    PT_L = o_peaks[0][0] - o_peaks[2][0]; PT_R = o_peaks[1][0] - o_peaks[3][0] # PL - TL ; PR - TR
-
+                    if change == '-':
+                        RL_P = o_peaks[1] - o_peaks[0]; RL_T = o_peaks[3] - o_peaks[2] # PR - PL; TR- TL
+                        PT_L = o_peaks[0] - o_peaks[2]; PT_R = o_peaks[1] - o_peaks[3] # PL - TL ; PR - TR
+                    elif change == '%':
+                        RL_P = _get_change(o_peaks[1][0], o_peaks[0][0]); RL_T = _get_change(o_peaks[3][0], o_peaks[2][0])
+                        PT_L = _get_change(o_peaks[0][0], o_peaks[2][0]); PT_R = _get_change(o_peaks[1][0], o_peaks[3][0])
+                        
                     RL = np.mean([RL_P, RL_T]) # mean([(PR - PL), (TR - TL)])
                     PT = np.mean([PT_L, PT_R]) # mean([(PL - TL), (PR - TR)]) 
 
@@ -94,9 +121,12 @@ def find_differences(data, measure='CF'):
         diffs =  {'x':[], 'y':[], 'cl':[]}
         for i, cl in enumerate(range(3,15)):
             exponents = data['cluster {}'.format(cl)]['spectral exponent']
-
-            RL_P = exponents[1] - exponents[0]; RL_T = exponents[3] - exponents[2] # PR - PL; TR- TL
-            PT_L = exponents[0] - exponents[2]; PT_R = exponents[1] - exponents[3] # PL - TL ; PR - TR
+            if change == '-':
+                RL_P = exponents[1] - exponents[0]; RL_T = exponents[3] - exponents[2] # PR - PL; TR- TL
+                PT_L = exponents[0] - exponents[2]; PT_R = exponents[1] - exponents[3] # PL - TL ; PR - TR
+            elif change == '%':
+                RL_P = _get_change(exponents[1], exponents[0]); RL_T = _get_change(exponents[3], exponents[2]) # PR - PL; TR- TL
+                PT_L = _get_change(exponents[0], exponents[2]); PT_R = _get_change(exponents[1], exponents[3]) # PL - TL ; PR - TR
 
             RL = np.mean([RL_P, RL_T]) # mean([(PR - PL), (TR - TL)])
             PT = np.mean([PT_L, PT_R]) # mean([(PL - TL), (PR - TR)]) 
