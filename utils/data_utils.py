@@ -5,7 +5,7 @@ from scipy.io import loadmat
 def load_and_fit(dimension, freqrange, omit_r2 = 0.7, aperiodic_mode = 'fixed', min_peak_height = 0, **fooof_kwargs):
     """dimension: if 'condition', averages across components
                   if 'component', averages across conditions
-        omit_r2 is r2 threshold
+        omit_r2 is r squared threshold
     """
     fit_data = dict.fromkeys(['cluster {}'.format(i) for i in range(3,15)])
 

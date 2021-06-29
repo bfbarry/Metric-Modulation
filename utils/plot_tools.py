@@ -13,7 +13,7 @@ def _prox_query(q, l, return_index = True):
     else:
         return l[diffs.index(min(diffs))]
 
-def plotFlatComps(fit_data, mark_peak, draw_omit = False, dimension='component'):
+def plotComps(fit_data, mark_peak, draw_omit = False, dimension='component'):
     """Plots all clusters and their component spectra. Point of oscillation is markered. 
     Spectra of components w/o oscillations are dotted.
     TODO: If draw_omit : plots omitted spectra w/ a different line style than the two existing ones"""
